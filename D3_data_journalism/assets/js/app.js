@@ -1,5 +1,8 @@
 // Script to create scatter plot between Healthcare & Poverty
 
+// ==========================================================
+// Set margins
+
 var svgWidth = 960;
 var svgHeight = 500;
 
@@ -13,6 +16,7 @@ var margin = {
 var width = svgWidth - margin.left - margin.right;
 var height = svgHeight - margin.top - margin.bottom;
 
+// ===========================================================
 // SVG wrapper
 var svg = d3
   .select(".chart")
@@ -24,15 +28,16 @@ var svg = d3
 var chartGroup = svg.append("g")
     .attr("transform", `translate(${margin.left}, ${margin.top})`);
 
+// ===========================================================
 // Initial Parameters
 var chosenXAxis = "poverty";
 
 // function to update x-scale on click of x-axis label
-function xScale(data, chosenXAxis) {
+function xScale(healthData, chosenXAxis) {
     // create scales
     var xLinearScale = d3.scaleLinear()
-        .domain([d3.min(data, d =>[chosenXAxis]) * 0.8,
-        d3.max(data, d => d[chosenXAxis]) * 1.2
+        .domain([d3.min(healthData, d =>[chosenXAxis]) * 0.8,
+        d3.max(healthData, d => d[chosenXAxis]) * 1.2
         ])
         .range([0, width]);
     
@@ -61,17 +66,62 @@ function renderCircles(circlesGroup, newXScale, chosenXAxis) {
 }
 
 // function to update circles group with new tooltip
+function updateToolTip(chosenXAxis, circlesGroup) {
+    var label; // initialize with empty string???
+    
+    if (chosenXAxis === 'poverty') {
+        label = "In Poverty (%)";
+    }
+    else if (chosenXAxis === 'age') {
+        label = "Age (Median)";
+    }
+    else {
+        label = "Household Income (Median)";
+    }
 
-// ==================================================
+    var toolTip = d3.tip()
+        .attr("class", "tooltip")
+        .offset([80, -60])
+        .html(function(d) {
+            return (`${d.abbr}`);
+        });
+    
+    circlesGroup.call(toolTip);
+
+    circlesGroup.on("mouseover", function(data) {
+        toolTip.show(data);
+    });
+
+    return circlesGroup;
+}
+
+// ===========================================================
 // Retrieve data from the CSV file 
-d3.csv("data.csv").then(function(healthData, err) {
+d3.csv("healthData.csv").then(function(healthData, err) {
     console.log(healthData);
     if (err) throw err;
 
-    //parse data
-    data.forEach(function(data) {
-        data.poverty = +data.poverty;
-        data.healthcare = +data.healthcare;
+    //parse data for all 3 sets of axes
+    healthData.forEach(function(data) {
+        data.poverty = +data.poverty;       // In Poverty (%)
+        data.healthcare = +data.healthcare; // Lacks Healthcare (Median)
+        data.age = +data.age;               // Age (Median)
+        data.smokes = +data.smokes;         // Smokes (%)
+        data.income = +data.income;         // Household Income (Median)
+        data.obesity = +data.obesity;       // Obese (%)
     });
     console.log(data);
+
+    // xLinearScale function above csv import
+    var xLinearScale = xScale(healthData, chosenXAxis);
+
+    // y scale function
+    var yLinearScale = d3.scaleLinear()
+        .domain([0, d3.max(healthData, d => d.healthcare)])
+        .range([height, 0]);
+    
+    // initial axis functions
+    var bottomAxis = d3.axisBottom(xLinearScale);
+    var leftAxis = d3.axisLeft(yLinearScale);
+    
 });
