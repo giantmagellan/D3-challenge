@@ -19,10 +19,13 @@ var height = svgHeight - margin.top - margin.bottom;
 // ===========================================================
 // SVG wrapper
 var svg = d3
-  .select(".chart")
+//   .select(".row")
+  .select("#scatter")
+  .classed('chart', true)
   .append("svg")
   .attr("width", svgWidth)
   .attr("height", svgHeight);
+console.log(svg);
 
 // Appending svg group
 var chartGroup = svg.append("g")
@@ -37,7 +40,7 @@ var chosenXAxis = "poverty";
 function xScale(healthData, chosenXAxis) {
     // create scales
     var xLinearScale = d3.scaleLinear()
-        .domain([d3.min(healthData, d =>[chosenXAxis]) * 0.8,
+        .domain([d3.min(healthData, d => d[chosenXAxis]) * 0.8,
         d3.max(healthData, d => d[chosenXAxis]) * 1.2
         ])
         .range([0, width]);
@@ -111,7 +114,7 @@ d3.csv("healthData.csv").then(function(healthData, err) {
         data.income = +data.income;         // Household Income (Median)
         data.obesity = +data.obesity;       // Obese (%)
     });
-    console.log(data);
+    // console.log(healthData);
 
     // xLinearScale function above csv import
     var xLinearScale = xScale(healthData, chosenXAxis);
@@ -137,7 +140,7 @@ d3.csv("healthData.csv").then(function(healthData, err) {
 
       // append initial circles
     var circlesGroup = chartGroup.selectAll("circle")
-    .data(hairData)
+    .data(healthData)
     .enter()
     .append("circle")
     .attr("cx", d => xLinearScale(d[chosenXAxis]))
@@ -154,30 +157,30 @@ d3.csv("healthData.csv").then(function(healthData, err) {
     
     var povertyLabel = labelsGroup.append("text")
         .attr("x", 0)
-        .attr("y", 20) // placement of label beneath the x-axis
+        .attr("y", 30) // placement of label beneath the x-axis
         .attr("value", "poverty") // value to grab for event listener
         .classed("active", true)
         .text("In Poverty (%)");
 
     var ageLabel = labelsGroup.append("text")
         .attr("x", 0)
-        .attr("y", 40) // placement of label beneath the x-axis
+        .attr("y", 50) // placement of label beneath the x-axis
         .attr("value", "age") // value to grab for event listener
-        .classed("active", true)
+        .classed("active", false)
         .text("Age (Median)");
     
     var incomeLabel = labelsGroup.append("text")
         .attr("x", 0)
-        .attr("y", 60) 
+        .attr("y", 70) 
         .attr("value", "income") // value for event listener
-        .classed("active", true)
+        .classed("active", false)
         .text("Household Income (Median)");
     
     // append y axis
     chartGroup.append("text")
         .attr("transform", "rotate(-90)")
         .attr("y", 0 - margin.left)
-        .attr("x", 0 - (heigh / 2))
+        .attr("x", 0 - (height / 2))
         .attr("dy", "1em")
         .classed("axis-text", true)
         .text("Lacks Healthcare (%)");
