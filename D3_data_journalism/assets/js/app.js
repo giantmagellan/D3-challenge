@@ -147,8 +147,8 @@ d3.csv("healthData.csv").then(function(healthData, err) {
     // .attr("cy", d => yLinearScale(d[chosenYAxis]))
     .attr("cy", d => yLinearScale(d.healthcare))
     .attr("r", 15)
-    .attr("fill", "lightblue")
-    .attr("opacity", ".75")
+    .attr("fill", "cyan")
+    .attr("opacity", ".5")
     .text(healthData.abbr);
 
     // Group for 3 x-axis labels
