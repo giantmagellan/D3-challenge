@@ -1,8 +1,6 @@
-// Script to create scatter plot between Healthcare & Poverty
-
-// ==========================================================
-// Set margins
-
+// ===========================================================
+// SET MARGINS
+// ===========================================================
 var svgWidth = 960;
 var svgHeight = 500;
 
@@ -17,7 +15,8 @@ var width = svgWidth - margin.left - margin.right;
 var height = svgHeight - margin.top - margin.bottom;
 
 // ===========================================================
-// SVG wrapper
+// SVG WRAPPER
+// ===========================================================
 var svg = d3.select("#scatter")
   .classed('chart', true)
   .append("svg")
@@ -30,13 +29,14 @@ var chartGroup = svg.append("g")
     .attr("transform", `translate(${margin.left}, ${margin.top})`);
 
 // ===========================================================
-// Initial Parameters
+// INITIAL PARAMETERS
+// ===========================================================
 var chosenXAxis = "poverty";
 var chosenYAxis = "healthcare";
 
 // ===========================================================
 // AXIS SCALES
-
+// ===========================================================
 // function to update x-scale on click of x-axis label
 function xScale(healthData, chosenXAxis) {
     // create scales
@@ -61,9 +61,8 @@ function xScale(healthData, chosenXAxis) {
 // }
 
 // ===========================================================
-// LABEL CLICK
-
-// function to update x-axis upon click on x-axis label
+// LABELS CLICK FUNCTION
+// ===========================================================
 function renderAxes(newXScale, xAxis) {
     var bottomAxis = d3.axisBottom(newXScale);
 
@@ -86,9 +85,8 @@ function renderAxes(newXScale, xAxis) {
 // }
 
 // ===========================================================
-// CIRCLES EDITING
-
-// function to update circle group with a transition to new circles
+// CIRCLES TRANSITION EDITING
+// ===========================================================
 function renderCircles(circlesGroup, newXScale, chosenXAxis) {
 
     circlesGroup.transition()
@@ -105,27 +103,19 @@ function renderCircles(circlesGroup, newXScale, chosenXAxis) {
 //         .attr("cy", s => newYScale(s[chosenYAxis]));
 // }
 
-// function to update circles group with new tooltip
+// ===========================================================
+// UPDATE CIRCLES/TOOLTIP FUNCTION
+// ===========================================================
 function updateToolTip(chosenXAxis, circlesGroup) {
-    // var label = ""; // initialize with empty string???
-    
+
     if (chosenXAxis === 'poverty') {
         label = "In Poverty (%)";
     }
     else if (chosenXAxis === 'age') {
         label = "Age (Median)";
     }
-    else if (chosenXAxis === 'income') {
-        label = "Household Income (Median)";
-    }
-    else if (chosenYAxis === 'healthcare') {
-        label = "Lacks Healthcare (%)";
-    }
-    else if (chosenYAxis === 'smokes') {
-        label = "Smokes (%)";
-    }
     else {
-        label = "Obese (%)";
+        label = "Household Income (Median)";
     }
 
     var toolTip = d3.tip()
@@ -143,7 +133,8 @@ function updateToolTip(chosenXAxis, circlesGroup) {
 }
 
 // ===========================================================
-// Retrieve data from the CSV file 
+// RETRIEVE DATA FROM CSV FILE
+// ===========================================================
 d3.csv("healthData.csv").then(function(healthData, err) {
     console.log(healthData);
     if (err) throw err;
@@ -153,9 +144,9 @@ d3.csv("healthData.csv").then(function(healthData, err) {
         data.poverty = +data.poverty;       // In Poverty (%)
         data.healthcare = +data.healthcare; // Lacks Healthcare (Median)
         data.age = +data.age;               // Age (Median)
-        data.smokes = +data.smokes;         // Smokes (%)
-        data.income = +data.income;         // Household Income (Median)
-        data.obesity = +data.obesity;       // Obese (%)
+        // data.smokes = +data.smokes;         // Smokes (%)
+        // data.income = +data.income;         // Household Income (Median)
+        // data.obesity = +data.obesity;       // Obese (%)
     });
     // console.log(healthData);
 
@@ -184,17 +175,17 @@ d3.csv("healthData.csv").then(function(healthData, err) {
     // .attr("transform", `translate(${height}, 0)`)
     .call(leftAxis);
 
-      // append initial circles
+    // append initial circles
     var circlesGroup = chartGroup.selectAll("circle")
-    .data(healthData)
-    .enter()
-    .append("circle")
-    .attr("cx", d => xLinearScale(d[chosenXAxis]))
-    .attr("cy", d => yLinearScale(d[chosenYAxis]))
-    // .attr("cy", d => yLinearScale(d.healthcare))
-    .attr("r", 15)
-    .attr("fill", "royalblue")
-    .attr("opacity", 0.8);
+        .data(healthData)
+        .enter()
+        .append("circle")
+        .attr("cx", d => xLinearScale(d[chosenXAxis]))
+        .attr("cy", d => yLinearScale(d[chosenYAxis]))
+        .attr("cy", d => yLinearScale(d.healthcare))
+        .attr("r", 15)
+        .attr("fillColor", "royalblue")
+        .attr("opacity", 0.8);
 
     var circleLabels = circlesGroup.selectAll(null)
         .data(healthData)
@@ -206,8 +197,7 @@ d3.csv("healthData.csv").then(function(healthData, err) {
     .attr("y", function(d) { return d.healthcare; })
     .text(function(d) { return d.abbr; })
     .attr("font-family", "sans-serif")
-    .attr("font-size", "5px")
-    .attr("fill", "white");
+    .attr("font-size", "5px");
 
     // Group for 3 x-axis labels
     var labelsGroup = chartGroup.append("g")
@@ -243,18 +233,6 @@ d3.csv("healthData.csv").then(function(healthData, err) {
         .classed("axis-text", true)
         .text("Lacks Healthcare (%)");
     
-    var smokesLabel = labelsGroup.append("text")
-        .attr("transform", "rotate(-90)")
-        .attr("y", 0 - margin.left)
-        .attr("x", 30 - (height/2))
-        // .attr("dy", "iem")
-        .attr("value", "smokes")
-        .classed("active", false)
-        .text("Smokes (%)");
-
-    var obesityLabel = labelsGroup.append("text")
-        .attr("transform", "rotate(-90)")
-        .attr("")
     
     var circlesGroup = updateToolTip(chosenXAxis, circlesGroup);
 
